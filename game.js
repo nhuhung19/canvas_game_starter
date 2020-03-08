@@ -9,31 +9,72 @@ Here, we create and add our "canvas" to the page.
 We also load all of our images. 
 */
 
-let game = true
+let gameOver;
 let canvas = document.getElementById("canvas")
 let ctx;
 let scores = 0;
+let timeSurvive = 0;
+let userName
+let heroDead;
+let btnSignIn = document.getElementById("submit-user")
 
+btnSignIn.addEventListener('click', userSignIn)
+
+function toggleElement() {
+    let elementRule = document.getElementById('rule-of-game')
+    if (elementRule.style.display === 'none') {
+        elementRule.style.display = 'block'
+    } else {
+        elementRule.style.display = 'none'
+    }
+}
+
+function userSignIn() {
+    userName = document.getElementById("Username").value
+    document.getElementById("user-name").innerHTML = `User Name: ${userName}`
+    document.getElementById("Username").value = ""
+    applicationState.currentUser = userName
+}
 // canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
 canvas.width = 512;
 canvas.height = 480;
 // document.body.appendChild(canvas);
+const applicationState = {
+    isGameOver: false,
+    currentUser: '',
+    highScore: {
+        user: '',
+        score: null
+    },
+    gameHistory: []
+};
 
-let bgReady, heroReady, monsterReady, tRexReady, gorillaReady, ghostReady;
-let bgImage, heroImage, monsterImage, tRexImage, gorillaImage, ghostImage;
+let oldHighScore = localStorage.getItem('highScore')
+if (oldHighScore) {
+    document.getElementById('high-score').innerHTML = `High Scores: ${oldHighScore}`
+}
+if (scores > oldHighScore) {
+    localStorage.setItem('highScore', scores)
+    oldHighScore = scores
+    document.getElementById('high-score').innerHTML = `High Scores: ${oldHighScore}`
+}
+
+let bgReady, heroReady, keyReady, tRexReady, gorillaReady, ghostReady, gameOverReady;
+let bgImage, heroImage, keyImage, tRexImage, gorillaImage, ghostImage, gameOverImage;
 
 let startTime = Date.now();
 const SECONDS_PER_ROUND = 0;
 let elapsedTime = 0;
 
 function loadImages() {
+
     gorillaImage = new Image();
     gorillaImage.onload = function() {
         // show the background image
         gorillaReady = true;
     };
-    gorillaImage.src = "images/monkey.png";
+    gorillaImage.src = "images/rsz_1monkey.png";
 
     bgImage = new Image();
     bgImage.onload = function() {
@@ -49,12 +90,12 @@ function loadImages() {
     };
     heroImage.src = "images/hero.png";
 
-    monsterImage = new Image();
-    monsterImage.onload = function() {
+    keyImage = new Image();
+    keyImage.onload = function() {
         // show the monster image
-        monsterReady = true;
+        keyReady = true;
     };
-    monsterImage.src = "images/monster.png";
+    keyImage.src = "images/rsz_key.png";
 
     tRexImage = new Image();
     tRexImage.onload = function() {
@@ -62,14 +103,20 @@ function loadImages() {
     }
     tRexImage.src = "images/T-Rex.png"
 
-
-
     ghostImage = new Image();
     ghostImage.onload = function() {
         // show the background image
         ghostReady = true;
     };
     ghostImage.src = "images/ghost.gif";
+
+    gameOverImage = new Image();
+    gameOverImage.onload = function() {
+        // show the background image
+        gameOverReady = true;
+    };
+    gameOverImage.src = "images/rsz_1game-over.png";
+
 }
 
 /** 
@@ -85,14 +132,14 @@ function loadImages() {
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
-let monsterX = 100;
-let monsterY = 100;
+let keyX = 100;
+let keyY = 100;
 
-let tRexX = 150;
-let tRexY = 200;
+let tRexX = 32 + Math.ceil(Math.random() * (canvas.width - 64));
+let tRexY = 32 + Math.ceil(Math.random() * (canvas.height - 64));
 
-let gorillaX = 70;
-let gorillaY = 70;
+let gorillaX = 32 + Math.ceil(Math.random() * (canvas.width - 64));
+let gorillaY = 32 + Math.ceil(Math.random() * (canvas.height - 64));
 
 let ghostX = 200;
 let ghostY = 250;
@@ -128,8 +175,8 @@ function setupKeyboardListeners() {
 let speedtRexX = 3
 let speedtRexY = 3
 
-let speedGorrilaX = 2
-let speedGorrilaY = 2
+let speedGorrilaX = 5
+let speedGorrilaY = 5
 
 let speedGhostX = 4
 let speedGhostY = 4
@@ -181,17 +228,19 @@ function ghostFly() {
 
 
 
-let heroDead;
 let update = function() {
 
-    heroDead = heroX <= (ghostX + 32) && heroY <= (ghostY + 32) && ghostY <= (heroY + 32) && ghostX <= (heroX + 32)
 
-
+    heroDead = heroX <= (ghostX + 20) && heroY <= (ghostY + 20) && ghostY <= (heroY + 20) && ghostX <= (heroX + 20)
 
     if (heroDead) {
-        game = false;
+        gameOver = true;
     }
-    if (!game) {
+    if (gameOver) {
+        // applicationState.currentUser = userName
+        // applicationState.highScore.user = userName
+        applicationState.highScore.score = scores
+        localStorage.setItem('highScore', applicationState.highScore.score)
         return
     }
     if (scores < 3) {
@@ -201,7 +250,7 @@ let update = function() {
         gorillaReady = true
         gorillaFly()
         if (heroDead) {
-            game = false;
+            gameOver = true;
         }
     }
     if (scores < 6) {
@@ -211,13 +260,15 @@ let update = function() {
         tRexReady = true
         tRexFly()
         if (heroDead) {
-            game = false
+            gameOver = true
         }
     }
 
 
     // Update the time.
+
     elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+
     tRexFly()
     ghostFly()
 
@@ -253,15 +304,15 @@ let update = function() {
     // Check if player and monster collided. Our images
     // are about 32 pixels big.
     if (
-        heroX <= (monsterX + 32) &&
-        monsterX <= (heroX + 32) &&
-        heroY <= (monsterY + 32) &&
-        monsterY <= (heroY + 32)
+        heroX <= (keyX + 32) &&
+        keyX <= (heroX + 32) &&
+        heroY <= (keyY + 32) &&
+        keyY <= (heroY + 32)
     ) {
         // Pick a new location for the monster.
         // Note: Change this to place the monster at a new, random location.
-        monsterX = 32 + Math.ceil(Math.random() * (canvas.width - 64))
-        monsterY = 32 + Math.ceil(Math.random() * (canvas.height - 64))
+        keyX = 32 + Math.ceil(Math.random() * (canvas.width - 64))
+        keyY = 32 + Math.ceil(Math.random() * (canvas.height - 64))
         scores++
     }
 
@@ -274,14 +325,15 @@ let update = function() {
  */
 var render = function() {
 
+
     if (bgReady) {
         ctx.drawImage(bgImage, 0, 0);
     }
     if (heroReady) {
         ctx.drawImage(heroImage, heroX, heroY);
     }
-    if (monsterReady) {
-        ctx.drawImage(monsterImage, monsterX, monsterY)
+    if (keyReady) {
+        ctx.drawImage(keyImage, keyX, keyY)
     }
     if (tRexReady) {
         ctx.drawImage(tRexImage, tRexX, tRexY)
@@ -294,9 +346,20 @@ var render = function() {
         ctx.drawImage(gorillaImage, gorillaX, gorillaY)
     }
 
+    if (gameOver) {
+        ctx.drawImage(gameOverImage, 220, 200)
+    }
+    if (resetGame) {
+        timeSurvive = 0
+    } else {
+        timeSurvive = SECONDS_PER_ROUND + elapsedTime
+    }
+    document.getElementById("time-survive").innerHTML = `Time Survive: ${timeSurvive}`
+    document.getElementById("score").innerHTML = `Scores: ${scores}`
     ctx.fillText(`Seconds Remaining: ${SECONDS_PER_ROUND + elapsedTime}`, 20, 100);
     ctx.fillText(`Your Scores: ${scores}`, 20, 150);
     ctx.fillStyle = "white"
+
 };
 
 /**
@@ -305,11 +368,13 @@ var render = function() {
  * render (based on the state of our game, draw the right things)
  */
 var main = function() {
+
     update();
     render();
     // Request to do this again ASAP. This is a special method
     // for web browsers. 
     requestAnimationFrame(main);
+
 };
 
 // Cross-browser support for requestAnimationFrame.
@@ -318,7 +383,22 @@ var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
 
 
+function startGame() {
+    loadImages();
+    setupKeyboardListeners();
+    main();
+    btnStart.style.visibility = "hidden"
+
+}
+
+function reset() {
+    location.reload();
+}
+let resetGame;
+let btnStart = document.getElementById("btnStart")
+btnStart.addEventListener('click', startGame)
+let btnReset = document.getElementById("btnReset")
+btnReset.addEventListener('click', reset)
+
+
 // Let's play this game!
-loadImages();
-setupKeyboardListeners();
-main();

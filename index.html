@@ -9,21 +9,57 @@
 </head>
 
 <body>
-    <section class="container-fluid row my-5">
-        <div class="col-lg-6 text-center" style="height: 400px;">
-            <h1>The Dark Castle</h1>
-            <div>The boy locked up in the castle has a lot of monsters and he is homesick. Help the boy escape the castle to go home</div>
-            <p>Score:</p>
-            <p>High Round:</p>
-            <p>Remain Time: </p>
-            <p>Level:</p>
-            <button>Reset Game</button>
-        </div>
-        <div class="col-lg-6">
-            <canvas id="canvas">
+    <div class="container">
+        <section class=" row my-5 d-flex justify-content-center " style="max-height: 480px;">
+            <div class="col-lg-5 text-center" style="height: 480px;">
+                <h1>The Dark Castle</h1>
+
+                <button class="w-100 btn btn-danger py-2 my-2" onclick="toggleElement()">Rule Of The Game</button>
+                <div id="rule-of-game" class="text-left w-100 font-weight-bold" style="display: none;">
+                    <div class="w-100 py-1">
+                        You need to claim <strong class="text-success">the key</strong> as much you can.
+                    </div>
+                    <div class="w-100 py-1">
+                        When you collect enough keys, more <span class="text-warning">monsters</span> will appear.
+                    </div>
+                    <div class="w-100 py-1">
+                        Try to stay away from them quickly as you can.
+                    </div>
+                    <div class="w-100 py-1">
+                        <span class="text-danger">Warning!!!</span>The monsters that appear later will fly faster and bigger~~
+                    </div>
+                    <div class="w-100 py-1">Goodluck and have fun!!!</div>
+                </div>
+                <form class="w-100">
+                    <div class="form-row ml-0 justify-content-center w-100">
+                        <div class="my-1">
+                            <label class="sr-only" for="inlineFormInputGroupUsername">Username</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">@</div>
+                                </div>
+                                <input type="text" class="form-control w-100 px-5" id="Username" placeholder="Username">
+                            </div>
+                        </div>
+                        <div class="my-1 mx-1">
+                            <button id="submit-user" type="button" class="btn btn-primary w-100 mr-5">Sign In</button>
+                        </div>
+                    </div>
+                </form>
+                <p class="font-weight-bold" style="font-size: 20px;" id="user-name">User Name:</p>
+                <p class="font-weight-bold" style="font-size: 20px;" id="score">Scores:</p>
+                <p class="font-weight-bold text-danger" style="font-size: 20px;" id="high-score">High Scores:</p>
+                <p class="font-weight-bold" style="font-size: 20px;" id="time-survive">Time Survive:</p>
+                <button id="btnStart" class="font-weight-bold btn btn-success py-2 px-5 mr-5 text-light">Start Game</button>
+                <button class="font-weight-bold text-light btn btn-warning py-2 px-5" id="btnReset">Reset Game</button>
+            </div>
+            <div class="col-lg-7 mt-5">
+                <canvas id="canvas">
             </canvas>
-        </div>
-    </section>
+            </div>
+        </section>
+    </div>
+    <footer class="text-center font-weight-bold"><strong>Built by: </strong><a href="#" class="text-success" style="text-decoration: none;">HungTa</a></footer>
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
